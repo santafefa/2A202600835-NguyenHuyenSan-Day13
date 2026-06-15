@@ -9,6 +9,8 @@ from .mock_rag import retrieve
 from .pii import hash_user_id, summarize_text
 from .tracing import langfuse_context, observe
 
+# Simple in-memory cache for bonus cost optimization
+_CACHE: dict[str, AgentResult] = {}
 
 @dataclass
 class AgentResult:
@@ -27,6 +29,19 @@ class LabAgent:
 
     @observe()
     def run(self, user_id: str, feature: str, session_id: str, message: str) -> AgentResult:
+        cache_key = f"{feature}:{message}"
+        if cache_key in _CACHE:
+            cached = _CACHE[cache_key]
+            metrics.record_request(
+                latency_ms=1, cost_usd=0.0, tokens_in=0, tokens_out=0, quality_score=cached.quality_score
+            )
+            langfuse_context.update_current_trace(
+                user_id=hash_user_id(user_id),
+                session_id=session_id,
+                tags=["lab", feature, self.model, "cached"],
+            )
+            return AgentResult(answer=cached.answer, latency_ms=1, tokens_in=0, tokens_out=0, cost_usd=0.0, quality_score=cached.quality_score)
+
         started = time.perf_counter()
         docs = retrieve(message)
         prompt = f"Feature={feature}\nDocs={docs}\nQuestion={message}"
@@ -53,7 +68,7 @@ class LabAgent:
             quality_score=quality_score,
         )
 
-        return AgentResult(
+        res = AgentResult(
             answer=response.text,
             latency_ms=latency_ms,
             tokens_in=response.usage.input_tokens,
@@ -61,6 +76,8 @@ class LabAgent:
             cost_usd=cost_usd,
             quality_score=quality_score,
         )
+        _CACHE[cache_key] = res
+        return res
 
     def _estimate_cost(self, tokens_in: int, tokens_out: int) -> float:
         input_cost = (tokens_in / 1_000_000) * 3

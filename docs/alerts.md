@@ -38,3 +38,15 @@
   - shorten prompts
   - route easy requests to cheaper model
   - apply prompt cache
+
+## 4. Low quality score
+- Severity: P3
+- Trigger: `quality_avg < 0.5 for 1h`
+- Impact: users are receiving unhelpful or poor answers
+- First checks:
+  1. Review traces with low quality scores in Langfuse
+  2. Check if context retrieval (RAG) is returning empty documents
+  3. Validate if system prompt was recently changed
+- Mitigation:
+  - revert prompt changes
+  - investigate vector database / retrieval health

@@ -1,9 +1,18 @@
 from __future__ import annotations
 
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file BEFORE other local imports
+load_dotenv()
+
+from contextlib import asynccontextmanager
+import json
+import datetime
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from structlog.contextvars import bind_contextvars
 
 from .agent import LabAgent
@@ -17,19 +26,25 @@ from .tracing import tracing_enabled
 
 configure_logging()
 log = get_logger()
-app = FastAPI(title="Day 13 Observability Lab")
-app.add_middleware(CorrelationIdMiddleware)
-agent = LabAgent()
 
-
-@app.on_event("startup")
-async def startup() -> None:
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     log.info(
         "app_started",
         service=os.getenv("APP_NAME", "day13-observability-lab"),
         env=os.getenv("APP_ENV", "dev"),
         payload={"tracing_enabled": tracing_enabled()},
     )
+    yield
+
+app = FastAPI(title="Day 13 Observability Lab", lifespan=lifespan)
+app.add_middleware(CorrelationIdMiddleware)
+agent = LabAgent()
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    return RedirectResponse(url="/dashboard")
 
 
 @app.get("/health")
@@ -42,11 +57,22 @@ async def metrics() -> dict:
     return snapshot()
 
 
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard() -> str:
+    from pathlib import Path
+    return Path("app/dashboard.html").read_text(encoding="utf-8")
+
+
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: Request, body: ChatRequest) -> ChatResponse:
-    # TODO: Enrich logs with request context (user_id_hash, session_id, feature, model, env)
-    # bind_contextvars(...)
-    
+    bind_contextvars(
+        user_id_hash=hash_user_id(body.user_id),
+        session_id=body.session_id,
+        feature=body.feature,
+        model=agent.model,
+        env=os.getenv("APP_ENV", "dev")
+    )
+
     log.info(
         "request_received",
         service="api",
@@ -89,10 +115,18 @@ async def chat(request: Request, body: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=500, detail=error_type) from exc
 
 
+def write_audit_log(action: str, details: dict) -> None:
+    audit_path = Path(os.getenv("AUDIT_LOG_PATH", "data/audit.jsonl"))
+    audit_path.parent.mkdir(parents=True, exist_ok=True)
+    entry = {"ts": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"), "action": action, **details}
+    with audit_path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(entry) + "\n")
+
 @app.post("/incidents/{name}/enable")
 async def enable_incident(name: str) -> JSONResponse:
     try:
         enable(name)
+        write_audit_log("incident_enabled", {"name": name})
         log.warning("incident_enabled", service="control", payload={"name": name})
         return JSONResponse({"ok": True, "incidents": status()})
     except KeyError as exc:
@@ -103,6 +137,7 @@ async def enable_incident(name: str) -> JSONResponse:
 async def disable_incident(name: str) -> JSONResponse:
     try:
         disable(name)
+        write_audit_log("incident_disabled", {"name": name})
         log.warning("incident_disabled", service="control", payload={"name": name})
         return JSONResponse({"ok": True, "incidents": status()})
     except KeyError as exc:

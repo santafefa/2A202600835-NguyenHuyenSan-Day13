@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day 13 Observability Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; }
+        .panel { background-color: #1e293b; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="p-8 font-sans">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-blue-400">Day 13 Observability Dashboard</h1>
+        <div class="text-sm text-gray-400 flex items-center gap-2">
+            <span id="statusIndicator" class="h-3 w-3 rounded-full bg-green-500"></span>
+            Auto-refreshing every 15s
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- 1. Traffic -->
+        <div class="panel flex flex-col justify-center items-center text-center">
+            <h2 class="text-lg font-semibold text-gray-300 mb-2">Traffic (Request Count)</h2>
+            <div id="trafficVal" class="text-6xl font-bold text-white">0</div>
+            <div class="text-sm text-gray-400 mt-2">Total requests processed</div>
+        </div>
+
+        <!-- 2. Quality Proxy -->
+        <div class="panel flex flex-col justify-center items-center text-center">
+            <h2 class="text-lg font-semibold text-gray-300 mb-2">Quality Score (Avg)</h2>
+            <div id="qualityVal" class="text-6xl font-bold text-green-400">0.00</div>
+            <div class="text-sm text-gray-400 mt-2">Threshold SLO: &gt; 0.50</div>
+        </div>
+
+        <!-- 3. Error Breakdown -->
+        <div class="panel text-center">
+            <h2 class="text-lg font-semibold text-gray-300 mb-4">Error Breakdown</h2>
+            <div class="relative h-48 w-full"><canvas id="errorChart"></canvas></div>
+            <div class="text-sm text-gray-400 mt-4">Target SLO: Error Rate &lt; 2%</div>
+        </div>
+
+        <!-- 4. Latency -->
+        <div class="panel text-center">
+            <h2 class="text-lg font-semibold text-gray-300 mb-4">Latency P50/P95/P99 (ms)</h2>
+            <div class="relative h-48 w-full"><canvas id="latencyChart"></canvas></div>
+            <div class="text-sm text-gray-400 mt-4">Target SLO: P95 &lt; 3000ms</div>
+        </div>
+
+        <!-- 5. Cost Over Time -->
+        <div class="panel text-center">
+            <h2 class="text-lg font-semibold text-gray-300 mb-4">Cost Over Time (USD)</h2>
+            <div class="relative h-48 w-full"><canvas id="costChart"></canvas></div>
+            <div class="text-sm text-gray-400 mt-4">Target SLO: Budget &lt; $2.5/day</div>
+        </div>
+
+        <!-- 6. Tokens In/Out -->
+        <div class="panel text-center">
+            <h2 class="text-lg font-semibold text-gray-300 mb-4">Tokens Usage Distribution</h2>
+            <div class="relative h-48 w-full"><canvas id="tokensChart"></canvas></div>
+            <div class="text-sm text-gray-400 mt-4">Total Tokens In vs Out</div>
+        </div>
+    </div>
+
+    <script>
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = '#334155';
+
+        const errorCtx = document.getElementById('errorChart').getContext('2d');
+        const errorChart = new Chart(errorCtx, {
+            type: 'doughnut',
+            data: { labels: ['Success'], datasets: [{ data: [1], backgroundColor: ['#10b981'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+
+        const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+        const latencyChart = new Chart(latencyCtx, {
+            type: 'bar',
+            data: { 
+                labels: ['P50', 'P95', 'P99'], 
+                datasets: [{ label: 'Latency (ms)', data: [0, 0, 0], backgroundColor: ['#3b82f6', '#f59e0b', '#ef4444'] }] 
+            },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+
+        const costCtx = document.getElementById('costChart').getContext('2d');
+        const costChart = new Chart(costCtx, {
+            type: 'bar',
+            data: { labels: ['Current Runtime'], datasets: [{ label: 'Total Cost ($)', data: [0], backgroundColor: '#8b5cf6' }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+
+        const tokensCtx = document.getElementById('tokensChart').getContext('2d');
+        const tokensChart = new Chart(tokensCtx, {
+            type: 'bar',
+            data: { labels: ['Tokens'], datasets: [
+                { label: 'Prompt (In)', data: [0], backgroundColor: '#06b6d4' },
+                { label: 'Completion (Out)', data: [0], backgroundColor: '#ec4899' }
+            ] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+
+        async function updateDashboard() {
+            try {
+                const res = await fetch('/metrics');
+                if (!res.ok) throw new Error("API Error");
+                const data = await res.json();
+                
+                document.getElementById('statusIndicator').classList.replace('bg-red-500', 'bg-green-500');
+
+                document.getElementById('trafficVal').innerText = data.traffic || 0;
+
+                const q = data.quality_avg || 0;
+                const qEl = document.getElementById('qualityVal');
+                qEl.innerText = q.toFixed(2);
+                qEl.className = `text-6xl font-bold ${q < 0.5 && data.traffic > 0 ? 'text-red-500' : 'text-green-400'}`;
+
+                if (data.error_breakdown && Object.keys(data.error_breakdown).length > 0) {
+                    errorChart.data.labels = Object.keys(data.error_breakdown);
+                    errorChart.data.datasets[0].data = Object.values(data.error_breakdown);
+                    errorChart.data.datasets[0].backgroundColor = ['#ef4444', '#f97316', '#f59e0b'];
+                } else {
+                    errorChart.data.labels = ['Success'];
+                    errorChart.data.datasets[0].data = [1];
+                    errorChart.data.datasets[0].backgroundColor = ['#10b981'];
+                }
+                errorChart.update();
+
+                latencyChart.data.datasets[0].data = [data.latency_p50 || 0, data.latency_p95 || 0, data.latency_p99 || 0];
+                latencyChart.update();
+
+                costChart.data.datasets[0].data = [data.total_cost_usd || 0];
+                costChart.update();
+
+                tokensChart.data.datasets[0].data = [data.tokens_in_total || 0];
+                tokensChart.data.datasets[1].data = [data.tokens_out_total || 0];
+                tokensChart.update();
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('statusIndicator').classList.replace('bg-green-500', 'bg-red-500');
+            }
+        }
+
+        updateDashboard();
+        setInterval(updateDashboard, 15000);
+    </script>
+</body>
+</html>
