@@ -38,7 +38,7 @@
 | Cost Budget | < $2.5/day | 1d | $1.25 |
 
 ### 3.3 Alerts & Runbook
-- [ALERT_RULES_SCREENSHOT]: ![Alert Rules](./alert_rules.png)
+- [ALERT_RULES_SCREENSHOT]: ![Alert Rules](./alert1.png), ![Alert Rules](./alert2.png)
 - [SAMPLE_RUNBOOK_LINK]: docs/alerts.md#4-low-quality-score
 
 ---
