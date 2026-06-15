@@ -7,7 +7,8 @@
 - [GROUP_NAME]: Individual (Nguyen Huyen San)
 - [REPO_URL]: https://github.com/your-username/day13-observability-lab
 - [MEMBERS]:
-  - Nguyen Huyen San | Role: Fullstack Observability (Logging, Tracing, Alerts, Dashboard, Report)
+  - Nguyen Huyen San | Role: Full-stack Observability (Logging, Tracing, Alerts, Dashboard, Report)
+
 ---
 
 ## 2. Group Performance (Auto-Verified)
@@ -15,6 +16,7 @@
 - [VALIDATE_LOGS_FINAL_SCORE]: 100/100
 - [TOTAL_TRACES_COUNT]: 15
 - [PII_LEAKS_FOUND]: 0
+
 ---
 
 ## 3. Technical Evidence (Group)
@@ -28,6 +30,7 @@
 ### 3.2 Dashboard & SLOs
 - [DASHBOARD_6_PANELS_SCREENSHOT]: ![Dashboard 6 Panels](./dashboard_6_panels.png)
 - [SLO_TABLE]:
+
 | SLI | Target | Window | Current Value |
 |---|---:|---|---:|
 | Latency P95 | < 3000ms | 28d | 2450ms |
