@@ -19,13 +19,13 @@
 ## 3. Technical Evidence (Group)
 
 ### 3.1 Logging & Tracing
-- `[EVIDENCE_CORRELATION_ID_SCREENSHOT]`: ./correlation_id_and_pii.png
-- `[EVIDENCE_PII_REDACTION_SCREENSHOT]`: ./correlation_id_and_pii.png
-- `[EVIDENCE_TRACE_WATERFALL_SCREENSHOT]`: ./langfuse_waterfall.png
+- `[EVIDENCE_CORRELATION_ID_SCREENSHOT]`: ![](./correlation_id_and_pii.png)
+- `[EVIDENCE_PII_REDACTION_SCREENSHOT]`: ![](./correlation_id_and_pii.png)
+- `[EVIDENCE_TRACE_WATERFALL_SCREENSHOT]`: ![](./langfuse_waterfall.png)
 - `[TRACE_WATERFALL_EXPLANATION]`: Trong Langfuse, Trace Waterfall cho thấy request được chia thành 2 span chính: `retrieve` (tương tác với RAG) và `generate` (tương tác với LLM). Nhìn vào đây có thể thấy rõ thời gian chủ yếu bị delay ở LLM span trong khi RAG span tốn rất ít thời gian.
 
 ### 3.2 Dashboard & SLOs
-- `[DASHBOARD_6_PANELS_SCREENSHOT]`: ./dashboard_6_panels.png
+- `[DASHBOARD_6_PANELS_SCREENSHOT]`: ![](./dashboard_6_panels.png)
 - `[SLO_TABLE]`:
 
 | SLI | Target | Window | Current Value |
@@ -35,7 +35,9 @@
 | Cost Budget | `< $2.5/day` | 1d | $1.25 |
 
 ### 3.3 Alerts & Runbook
-- `[ALERT_RULES_SCREENSHOT]`: ./alert1.png, ./alert2.png
+- `[ALERT_RULES_SCREENSHOT]`:
+- ![](./alert1.png)
+- ![](./alert2.png)
 - `[SAMPLE_RUNBOOK_LINK]`: docs/alerts.md#4-low-quality-score
 
 ---
