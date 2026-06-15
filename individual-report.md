@@ -3,18 +3,19 @@
 > **Instruction**: Fill in all sections below. This report is designed to be parsed by an automated grading assistant. Ensure all tags (e.g., `[GROUP_NAME]`) are preserved.
 
 ## 1. Team Metadata
+
 - [GROUP_NAME]: Individual (Nguyen Huyen San)
-- [REPO_URL]: https://github.com/santafefa/2A202600835-NguyenHuyenSan-Day13.git
+- [REPO_URL]: https://github.com/your-username/day13-observability-lab
 - [MEMBERS]:
   - Nguyen Huyen San | Role: Full-stack Observability (Logging, Tracing, Alerts, Dashboard, Report)
 
 ---
 
 ## 2. Group Performance (Auto-Verified)
+
 - [VALIDATE_LOGS_FINAL_SCORE]: 100/100
 - [TOTAL_TRACES_COUNT]: 15
 - [PII_LEAKS_FOUND]: 0
-
 ---
 
 ## 3. Technical Evidence (Group)
