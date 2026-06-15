@@ -31,9 +31,9 @@
 
 | SLI | Target | Window | Current Value |
 |---|---:|---|---:|
-| Latency P95 | < 3000ms | 28d | 2450ms |
-| Error Rate | < 2% | 28d | 0.0% |
-| Cost Budget | < $2.5/day | 1d | $1.25 |
+| Latency P95 | `< 3000ms` | 28d | 2450ms |
+| Error Rate | `< 2%` | 28d | 0.0% |
+| Cost Budget | `< $2.5/day` | 1d | $1.25 |
 
 ### 3.3 Alerts & Runbook
 - [ALERT_RULES_SCREENSHOT]: ./alert1.png, ./alert2.png
@@ -54,11 +54,10 @@
 
 ### Nguyen Huyen San
 - [TASKS_COMPLETED]: Hoàn thành toàn bộ Lab với vai trò cá nhân.
-
-    1. **Middleware & Logs Context**: Xây dựng `CorrelationIdMiddleware`, xử lý `bind_contextvars` gộp các thông tin `user_id_hash`, `session_id`, `feature`, `model` vào log payload.
-    2. **PII Scrubbing**: Viết structlog processor (`scrub_event`) để ẩn các dữ liệu nhạy cảm (email, credit card) trong payload.
-    3. **Alerting & Runbooks**: Bổ sung cảnh báo Custom Metric (`low_quality_score`) và tài liệu Runbook xử lý.
-    4. **Langfuse & Dashboard**: Load test để sinh dữ liệu, xem xét Traces trên Langfuse và thiết lập Dashboard 6 Panels (Latency, Traffic, Cost, Token, Errors, Quality).
+  1. **Middleware & Logs Context**: Xây dựng `CorrelationIdMiddleware`, xử lý `bind_contextvars` gộp các thông tin `user_id_hash`, `session_id`, `feature`, `model` vào log payload.
+  2. **PII Scrubbing**: Viết structlog processor (`scrub_event`) để ẩn các dữ liệu nhạy cảm (email, credit card) trong payload.
+  3. **Alerting & Runbooks**: Bổ sung cảnh báo Custom Metric (`low_quality_score`) và tài liệu Runbook xử lý.
+  4. **Langfuse & Dashboard**: Load test để sinh dữ liệu, xem xét Traces trên Langfuse và thiết lập Dashboard 6 Panels (Latency, Traffic, Cost, Token, Errors, Quality).
 
 - [EVIDENCE_LINK]: https://github.com/your-username/day13-observability-lab/commits/main
 - [DEEP_DIVE_EXPLANATION]: Trong middleware, phải gọi `clear_contextvars()` trước mỗi request để tránh rò rỉ context giữa các requests (do tính chất bất đồng bộ của FastAPI). Về PII scrubber, tích hợp vào structlog processor giúp tự động hóa việc che giấu dữ liệu cho toàn bộ ứng dụng, thay vì phải format thủ công ở từng điểm ghi log.
