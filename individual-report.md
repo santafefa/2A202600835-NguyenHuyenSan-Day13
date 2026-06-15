@@ -7,8 +7,7 @@
 - [GROUP_NAME]: Individual (Nguyen Huyen San)
 - [REPO_URL]: https://github.com/your-username/day13-observability-lab
 - [MEMBERS]:
-  - Nguyen Huyen San | Role: Full-stack Observability (Logging, Tracing, Alerts, Dashboard, Report)
-
+  - Nguyen Huyen San | Role: Fullstack Observability (Logging, Tracing, Alerts, Dashboard, Report)
 ---
 
 ## 2. Group Performance (Auto-Verified)
