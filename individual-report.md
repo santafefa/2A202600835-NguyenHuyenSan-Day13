@@ -67,10 +67,3 @@
 
 - [EVIDENCE_LINK]: https://github.com/your-username/day13-observability-lab/commits/main
 - [DEEP_DIVE_EXPLANATION]: Trong middleware, phải gọi `clear_contextvars()` trước mỗi request để tránh rò rỉ context giữa các requests (do tính chất bất đồng bộ của FastAPI). Về PII scrubber, tích hợp vào structlog processor giúp tự động hóa việc che giấu dữ liệu cho toàn bộ ứng dụng, thay vì phải format thủ công ở từng điểm ghi log.
-
----
-
-## 6. Bonus Items (Optional)
-- [BONUS_COST_OPTIMIZATION]: **Cơ chế Caching (+3đ)**: Đã thêm từ điển `_CACHE` vào `app/agent.py`. Nếu người dùng hỏi trùng lặp một câu hỏi trước đó, hệ thống lập tức trả về kết quả từ Cache với `cost_usd = 0.0` và `latency_ms = 1`. Giảm tải LLM và chi phí một cách rõ rệt.
-- [BONUS_AUDIT_LOGS]: **Audit Logs Tách Rời (+2đ)**: Đã phát triển hàm `write_audit_log` ghi file riêng. Mọi hành động thao tác hệ thống mang tính rủi ro (như bật/tắt incident) đều được ghi nhận trực tiếp vào file `data/audit.jsonl` đáp ứng yêu cầu lưu trữ log bảo mật.
-- [BONUS_CUSTOM_METRIC]: **Chỉ số Chất lượng & Dashboard Đẹp (+5đ)**: Bổ sung custom metric `quality_avg` và luật alert `low_quality_score`. Hơn nữa, tự lập trình giao diện Dashboard HTML/Chart.js chuyên nghiệp trực tiếp trên FastAPI thay vì dùng công cụ ngoài.
