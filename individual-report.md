@@ -3,16 +3,14 @@
 > **Instruction**: Fill in all sections below. This report is designed to be parsed by an automated grading assistant. Ensure all tags (e.g., `[GROUP_NAME]`) are preserved.
 
 ## 1. Team Metadata
-
 - [GROUP_NAME]: Individual (Nguyen Huyen San)
 - [REPO_URL]: https://github.com/your-username/day13-observability-lab
 - [MEMBERS]:
-  - Nguyen Huyen San | Role: Full-stack Observability (Logging, Tracing, Alerts, Dashboard, Report)
+  - Nguyen Huyen San | Role: Fullstack Observability (Logging, Tracing, Alerts, Dashboard, Report)
 
 ---
 
 ## 2. Group Performance (Auto-Verified)
-
 - [VALIDATE_LOGS_FINAL_SCORE]: 100/100
 - [TOTAL_TRACES_COUNT]: 15
 - [PII_LEAKS_FOUND]: 0
@@ -22,13 +20,13 @@
 ## 3. Technical Evidence (Group)
 
 ### 3.1 Logging & Tracing
-- [EVIDENCE_CORRELATION_ID_SCREENSHOT]: ![Correlation ID](correlation_id_and_pii.png)
-- [EVIDENCE_PII_REDACTION_SCREENSHOT]: ![PII Redaction](correlation_id_and_pii.png)
-- [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: ![Trace Waterfall](langfuse_waterfall.png)
+- [EVIDENCE_CORRELATION_ID_SCREENSHOT]: ./correlation_id_and_pii.png
+- [EVIDENCE_PII_REDACTION_SCREENSHOT]: ./correlation_id_and_pii.png
+- [EVIDENCE_TRACE_WATERFALL_SCREENSHOT]: ./langfuse_waterfall.png
 - [TRACE_WATERFALL_EXPLANATION]: Trong Langfuse, Trace Waterfall cho thấy request được chia thành 2 span chính: `retrieve` (tương tác với RAG) và `generate` (tương tác với LLM). Nhìn vào đây có thể thấy rõ thời gian chủ yếu bị delay ở LLM span trong khi RAG span tốn rất ít thời gian.
 
 ### 3.2 Dashboard & SLOs
-- [DASHBOARD_6_PANELS_SCREENSHOT]: ![Dashboard 6 Panels](./dashboard_6_panels.png)
+- [DASHBOARD_6_PANELS_SCREENSHOT]: ./dashboard_6_panels.png
 - [SLO_TABLE]:
 
 | SLI | Target | Window | Current Value |
@@ -38,7 +36,7 @@
 | Cost Budget | < $2.5/day | 1d | $1.25 |
 
 ### 3.3 Alerts & Runbook
-- [ALERT_RULES_SCREENSHOT]: ![Alert Rules](./alert1.png), ![Alert Rules](./alert2.png)
+- [ALERT_RULES_SCREENSHOT]: ./alert1.png, ./alert2.png
 - [SAMPLE_RUNBOOK_LINK]: docs/alerts.md#4-low-quality-score
 
 ---
@@ -56,10 +54,12 @@
 
 ### Nguyen Huyen San
 - [TASKS_COMPLETED]: Hoàn thành toàn bộ Lab với vai trò cá nhân.
-  1. **Middleware & Logs Context**: Xây dựng `CorrelationIdMiddleware`, xử lý `bind_contextvars` gộp các thông tin `user_id_hash`, `session_id`, `feature`, `model` vào log payload.
-  2. **PII Scrubbing**: Viết structlog processor (`scrub_event`) để ẩn các dữ liệu nhạy cảm (email, credit card) trong payload.
-  3. **Alerting & Runbooks**: Bổ sung cảnh báo Custom Metric (`low_quality_score`) và tài liệu Runbook xử lý.
-  4. **Langfuse & Dashboard**: Load test để sinh dữ liệu, xem xét Traces trên Langfuse và thiết lập Dashboard 6 Panels (Latency, Traffic, Cost, Token, Errors, Quality).
+
+    1. **Middleware & Logs Context**: Xây dựng `CorrelationIdMiddleware`, xử lý `bind_contextvars` gộp các thông tin `user_id_hash`, `session_id`, `feature`, `model` vào log payload.
+    2. **PII Scrubbing**: Viết structlog processor (`scrub_event`) để ẩn các dữ liệu nhạy cảm (email, credit card) trong payload.
+    3. **Alerting & Runbooks**: Bổ sung cảnh báo Custom Metric (`low_quality_score`) và tài liệu Runbook xử lý.
+    4. **Langfuse & Dashboard**: Load test để sinh dữ liệu, xem xét Traces trên Langfuse và thiết lập Dashboard 6 Panels (Latency, Traffic, Cost, Token, Errors, Quality).
+
 - [EVIDENCE_LINK]: https://github.com/your-username/day13-observability-lab/commits/main
 - [DEEP_DIVE_EXPLANATION]: Trong middleware, phải gọi `clear_contextvars()` trước mỗi request để tránh rò rỉ context giữa các requests (do tính chất bất đồng bộ của FastAPI). Về PII scrubber, tích hợp vào structlog processor giúp tự động hóa việc che giấu dữ liệu cho toàn bộ ứng dụng, thay vì phải format thủ công ở từng điểm ghi log.
 
